@@ -35,6 +35,7 @@ export default function RootLayout({
         className={`${inter.variable} antialiased`}
       >
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
