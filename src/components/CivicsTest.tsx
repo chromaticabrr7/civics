@@ -8,7 +8,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Separator } from "@/components/ui/separator";
 import { useState, useRef, useEffect } from "react";
 import { CornerDownLeft } from "lucide-react";
-import { ArrowTurnDownLeftIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/16/solid";
+import { ArrowTurnDownLeftIcon, CheckCircleIcon, XCircleIcon, ArrowPathRoundedSquareIcon } from "@heroicons/react/16/solid";
+import { AnimatePresence, motion } from "framer-motion";
 
 type CivicsQuestion = {
   question: string;
@@ -38,10 +39,13 @@ export default function CivicsTest({ questions }: CivicsTestProps) {
 
   // Focus the input on every render
   useEffect(() => {
-    if (inputRef.current && !grading) {
-      inputRef.current.focus();
+    if (!grading) {
+      const timeout = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50); // 100ms delay ensures input is mounted after animation
+      return () => clearTimeout(timeout);
     }
-  });
+  }, [current, grading]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,37 +90,51 @@ return (
     <>
         <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen w-full p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
             <main className="flex flex-col max-w-300 w-full gap-[32px] row-start-2 items-center sm:items-start">
-                {questions[current] && (
-                    <div className="flex flex-col w-full gap-2">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={current}
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -24 }}
+                        transition={{ duration: 0.3 }}
+                        onAnimationComplete={() => {
+                            if (inputRef.current && !grading) {
+                                inputRef.current.focus();
+                            }
+                        }}
+                        className="flex flex-col w-full gap-2"
+                    >
                         <span className="text-base font-semibold text-neutral-500">
                             Question {current + 1} of 10
                         </span>
-                        <span className="text-3xl font-medium text-neutral-700">
-                            {questions[current].question}
-                        </span>
-                    </div>
-                )}
-                <form onSubmit={handleSubmit} className="w-full">
-                    <div className="flex w-full items-center space-x-2">
-                        <Input 
-                            ref={inputRef}
-                            value={userAnswer}
-                            onChange={(e) => setUserAnswer(e.target.value)} 
-                            placeholder="Type your answer here." 
-                            required
-                            disabled={grading}
-                            className="!text-3xl font-medium placeholder:text-neutral-400 w-full border-none shadow-none p-0 focus:border-none focus:outline-none focus:ring-0 focus-visible:ring-0"
-                        />
-                        <Button 
-                            type="submit" 
-                            disabled={grading || !userAnswer.trim()}
-                            className="!text-3xl text-neutral-500 font-normal bg-transparent shadow-none hover:bg-transparent hover:text-neutral-700 p-0 cursor-pointer"
-                        >
-                        <CornerDownLeft className="size-8 opacity-50" />
-                            {grading ? 'Grading...' : 'Submit'}
-                        </Button>
-                    </div>
-                </form>
+                        <div className="flex flex-col gap-8">
+                            <span className="text-3xl font-medium text-neutral-700">
+                                {questions[current]?.question}
+                            </span>
+                        <form onSubmit={handleSubmit} className="w-full">
+                            <div className="flex w-full items-center space-x-2">
+                                <Input 
+                                    ref={inputRef}
+                                    value={userAnswer}
+                                    onChange={(e) => setUserAnswer(e.target.value)} 
+                                    placeholder="Type your answer here." 
+                                    required
+                                    disabled={grading}
+                                    className="!text-3xl font-medium placeholder:text-neutral-400 w-full border-none shadow-none p-0 focus:border-none focus:outline-none focus:ring-0 focus-visible:ring-0"
+                                />
+                                <Button 
+                                    type="submit" 
+                                    disabled={grading || !userAnswer.trim()}
+                                    className="!text-3xl text-neutral-500 font-normal bg-transparent shadow-none hover:bg-transparent hover:text-neutral-700 p-0 cursor-pointer"
+                                >
+                                <CornerDownLeft className="size-8 opacity-50" />
+                                    {grading ? 'Grading...' : 'Submit'}
+                                </Button>
+                                </div>
+                            </form>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
             </main>
         </div>
         <Dialog 
@@ -128,7 +146,7 @@ return (
             }}
         >
             <DialogContent className="lg:max-w-[30vw] max-h-[90vh] p-0 border-none ring-1 ring-neutral-900/10 gap-0">
-                <DialogHeader className="px-6 py-6">
+                <DialogHeader className="px-4 py-6 gap-1">
                     <DialogTitle className="flex flex-col gap-2 text-xl font-semibold text-neutral-900">
                         {status === 'passed' ? 'Congrats, you passed!' : 'You did not pass'}
                     </DialogTitle>
@@ -174,38 +192,12 @@ return (
                                         </AccordionContent>
                                     </AccordionItem>
                                 </Accordion>
-                                // <Card key={i} 
-                                //     className="p-2 gap-0 shadow-none border-none bg-neutral-100"
-                                // >
-                                //     <CardHeader className="px-4 py-4">
-                                //         <CardTitle className="flex flex-col gap-2">
-                                //             <div className="flex items-center gap-2">
-                                //                 {r.isCorrect ? (
-                                //                     <CheckCircleIcon className="size-4 text-green-500" />
-                                //                 ) : (
-                                //                     <XCircleIcon className="size-4 text-red-500" />
-                                //                 )}
-                                //                 <p className="text-sm text-neutral-500">Question {i + 1} of 10</p>
-                                //             </div>
-                                //             <p className="font-medium leading-6">{r.question}</p>
-                                //         </CardTitle>
-                                //     </CardHeader>
-                                //     <CardContent className="flex flex-col gap-1 px-0 py-4 bg-white rounded-lg ring ring-neutral-200 !ring-opacity-50 shadow-sm">
-                                //         <p className="px-4 text-sm text-neutral-500">Your answer:</p>
-                                //         <p className="px-4 font-medium mb-2">{r.userAnswer}</p>
-                                //         <Separator className="my-0" />
-                                //         <p className="px-4 pt-2 text-sm text-neutral-500">Correct answer(s):</p>
-                                //         {r.trueAnswers?.map((answer, idx) => (
-                                //             <p key={idx} className="px-4 text-sm font-medium text-neutral-600">{answer}</p>
-                                //         ))}
-                                //     </CardContent>
-                                // </Card>
                             ))}
                         </div>
                     </div>
                 </div>
                 <Separator className="my-0" />
-                <DialogFooter className="px-6 py-4">
+                <DialogFooter className="px-6 py-6">
                     <DialogClose asChild>
                         <Button 
                             type="button" 
@@ -215,8 +207,9 @@ return (
                                     window.location.reload();
                                 }, 1500);
                             }}
-                            className="cursor-pointer"
+                            className="cursor-pointer w-full"
                         >
+                            <ArrowPathRoundedSquareIcon className="size-5 opacity-40" />
                             Run it again
                         </Button>
                     </DialogClose>
