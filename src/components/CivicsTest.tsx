@@ -154,14 +154,23 @@ return (
                                                     ) : (
                                                         <XCircleIcon className="size-4 text-red-500" />
                                                     )}
-                                                    <p className="text-sm text-neutral-500">Question {i + 1} of 10</p>
+                                                    <p className="text-neutral-500">Question {i + 1} of 10</p>
                                                 </div>
                                                 <p className="font-medium leading-5">{r.question}</p>
                                             </div>
                                         </AccordionTrigger>
-                                        <AccordionContent>
-                                            <p className="text-sm text-neutral-500">Your answer:</p>
-                                            <p className="font-medium">{r.userAnswer}</p>
+                                        <AccordionContent className="pb-0 border-1 rounded-lg mb-4">
+                                            <div className="flex flex-col gap-0 p-2">
+                                                <p className="text-sm text-neutral-500">Your answer:</p>
+                                                <p className="font-medium">{r.userAnswer}</p>
+                                            </div>
+                                            <Separator className="my-0" />
+                                            <div className="flex flex-col gap-0 p-2">
+                                                <p className="text-sm text-neutral-500">Correct answer(s):</p>
+                                                {r.trueAnswers?.map((answer, idx) => (
+                                                    <p key={idx} className="text-sm font-medium text-neutral-600">{answer}</p>
+                                                ))}
+                                            </div>
                                         </AccordionContent>
                                     </AccordionItem>
                                 </Accordion>
@@ -200,7 +209,7 @@ return (
                     <DialogClose asChild>
                         <Button 
                             type="button" 
-                            variant="default"
+                            variant="secondary"
                             onClick={() => {
                                 setTimeout(() => {
                                     window.location.reload();
