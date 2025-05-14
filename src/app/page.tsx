@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { civicsQuestions } from "@/lib/civicsQuestions";
 import CivicsTest from "@/components/CivicsTest";
 
